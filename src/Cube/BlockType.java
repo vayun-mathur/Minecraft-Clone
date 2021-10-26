@@ -24,11 +24,11 @@ public class BlockType {
 			e.printStackTrace();
 		}
 		assert blockTex != null;
-		GRASS = new BlockType(1, new ModelTexture(rendering.getLoader().loadTexture("textures/block/grass_block_side")), getVector2((JSONObject) blockTex.get("grass_block_side")), getVector2((JSONObject) blockTex.get("grass_block_top")), getVector2((JSONObject) blockTex.get("dirt")));
-		DIRT = new BlockType(2, new ModelTexture(rendering.getLoader().loadTexture("textures/block/dirt")), getVector2((JSONObject) blockTex.get("dirt")));
-		STONE = new BlockType(3, new ModelTexture(rendering.getLoader().loadTexture("textures/block/stone")), getVector2((JSONObject) blockTex.get("stone")));
-		TREEBARK = new BlockType(4, new ModelTexture(rendering.getLoader().loadTexture("textures/block/oak_log")), getVector2((JSONObject) blockTex.get("oak_log")), getVector2((JSONObject) blockTex.get("oak_log_top")), getVector2((JSONObject) blockTex.get("oak_log_top")));
-		TREELEAF = new BlockType(5, new ModelTexture(rendering.getLoader().loadTexture("textures/block/oak_leaves")), getVector2((JSONObject) blockTex.get("oak_leaves")));
+		GRASS = new BlockType(1, new ModelTexture(rendering.getLoader().loadTexture("textures/block/grass_block_side")), true, getVector2((JSONObject) blockTex.get("grass_block_side")), getVector2((JSONObject) blockTex.get("grass_block_top")), getVector2((JSONObject) blockTex.get("dirt")));
+		DIRT = new BlockType(2, new ModelTexture(rendering.getLoader().loadTexture("textures/block/dirt")), true, getVector2((JSONObject) blockTex.get("dirt")));
+		STONE = new BlockType(3, new ModelTexture(rendering.getLoader().loadTexture("textures/block/stone")), true, getVector2((JSONObject) blockTex.get("stone")));
+		TREEBARK = new BlockType(4, new ModelTexture(rendering.getLoader().loadTexture("textures/block/oak_log")), true, getVector2((JSONObject) blockTex.get("oak_log")), getVector2((JSONObject) blockTex.get("oak_log_top")), getVector2((JSONObject) blockTex.get("oak_log_top")));
+		TREELEAF = new BlockType(5, new ModelTexture(rendering.getLoader().loadTexture("textures/block/oak_leaves")), false, getVector2((JSONObject) blockTex.get("oak_leaves")));
 
 	}
 
@@ -39,19 +39,22 @@ public class BlockType {
 	Vector2f side, top, bottom;
 	int id;
 	ModelTexture tex;
-	BlockType(int id, ModelTexture tex, Vector2f all) {
+	boolean solid;
+	BlockType(int id, ModelTexture tex, boolean solid, Vector2f all) {
 		this.side = all;
 		this.top = all;
 		this.bottom = all;
 		this.id = id;
 		this.tex = tex;
+		this.solid = solid;
 	}
-	BlockType(int id, ModelTexture tex, Vector2f side, Vector2f top, Vector2f bottom) {
+	BlockType(int id, ModelTexture tex, boolean solid, Vector2f side, Vector2f top, Vector2f bottom) {
 		this.side = side;
 		this.top = top;
 		this.bottom = bottom;
 		this.id = id;
 		this.tex = tex;
+		this.solid = solid;
 	}
 
 	public ModelTexture getTex() {
@@ -73,4 +76,8 @@ public class BlockType {
     public int getID() {
 		return id;
     }
+
+	public boolean isSolid() {
+		return solid;
+	}
 }

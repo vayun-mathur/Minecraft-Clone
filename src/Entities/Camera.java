@@ -66,7 +66,7 @@ public class Camera {
 		boolean bodyheight = m.blocks[x][y][z] != null;
 		boolean belowheight = m.blocks[x][y-1][z] != null;
 		if(bodyheight && !headheight) {
-			position.y += 1;
+			yspeed = 0.1f;
 		}
 		if(belowheight) {
 			intersectingBlock = true;

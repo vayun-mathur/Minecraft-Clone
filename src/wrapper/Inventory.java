@@ -3,11 +3,24 @@ package wrapper;
 import Cube.Block;
 import Cube.BlockType;
 import gui.GuiObject;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector2f;
 
 public class Inventory {
     Item[] inventorySlots = new Item[40];
+
+    static Vector2f[] hotbarLocations = new Vector2f[]{
+            new Vector2f(-0.444f, -0.77777777777f),
+            new Vector2f(-0.333f, -0.77777777777f),
+            new Vector2f(-0.222f, -0.77777777777f),
+            new Vector2f(-0.111f, -0.77777777777f),
+            new Vector2f(0, -0.77777777777f),
+            new Vector2f(0.111f, -0.77777777777f),
+            new Vector2f(0.222f, -0.77777777777f),
+            new Vector2f(0.333f, -0.77777777777f),
+            new Vector2f(0.444f, -0.77777777777f)
+    };
 
     static Vector2f[] clickLocations = new Vector2f[] {
             new Vector2f(-0.35614306f, -0.4274084f),
@@ -61,6 +74,7 @@ public class Inventory {
     }
 
     int currentItem = -1;
+    int currentHotbarItem = 0;
 
     public Inventory() {
         for(int i=0;i<40;i++) {
@@ -74,6 +88,18 @@ public class Inventory {
 
     public int getCurrentItemQuantity() {
         return inventorySlots[currentItem].quantity;
+    }
+
+    public void hotbarInput() {
+        if(Input.getKeyDown(Keyboard.KEY_1)) currentHotbarItem=0;
+        if(Input.getKeyDown(Keyboard.KEY_2)) currentHotbarItem=1;
+        if(Input.getKeyDown(Keyboard.KEY_3)) currentHotbarItem=2;
+        if(Input.getKeyDown(Keyboard.KEY_4)) currentHotbarItem=3;
+        if(Input.getKeyDown(Keyboard.KEY_5)) currentHotbarItem=4;
+        if(Input.getKeyDown(Keyboard.KEY_6)) currentHotbarItem=5;
+        if(Input.getKeyDown(Keyboard.KEY_7)) currentHotbarItem=6;
+        if(Input.getKeyDown(Keyboard.KEY_8)) currentHotbarItem=7;
+        if(Input.getKeyDown(Keyboard.KEY_9)) currentHotbarItem=8;
     }
 
     public void input() {
@@ -104,6 +130,8 @@ public class Inventory {
                 if(inventorySlots[clickIndex].empty()) {
                     move(currentItem, clickIndex);
                     currentItem = -1;
+                } else if(clickIndex == currentItem) {
+                    currentItem = -1;
                 }
             }
         }
@@ -131,10 +159,35 @@ public class Inventory {
         }
     }
 
+    public void remove1SelectedHotbarItem() {
+        inventorySlots[currentHotbarItem].quantity--;
+        if(inventorySlots[currentHotbarItem].quantity==0) {
+            inventorySlots[currentHotbarItem].type = null;
+        }
+    }
+
     public void renderPrepare(Rendering renderer) {
         for(int i=0;i<inventorySlots.length;i++) {
             if(!inventorySlots[i].empty()) {
-                renderer.getRenderer().addGUI(new GuiObject(inventorySlots[i].type.getTex(), new Vector2f(clickLocations[i].x + blocksize.x, clickLocations[i].y-blocksize.y), (Vector2f)new Vector2f(blocksize).scale(0.75f)));
+                if(i==currentItem) {
+                    renderer.getRenderer().addGUI(new GuiObject(inventorySlots[i].type.getTex(), new Vector2f( Input.getMousePosition().x / Display.getWidth() * 2 - 1, Input.getMousePosition().y / Display.getHeight() * 2 - 1), (Vector2f) new Vector2f(blocksize).scale(0.75f)));
+                } else {
+                    renderer.getRenderer().addGUI(new GuiObject(inventorySlots[i].type.getTex(), new Vector2f(clickLocations[i].x + blocksize.x, clickLocations[i].y - blocksize.y), (Vector2f) new Vector2f(blocksize).scale(0.75f)));
+                }
+            }
+        }
+    }
+
+    public BlockType getCurrentHotbarType() {
+        return inventorySlots[currentHotbarItem].type;
+    }
+
+    public void renderHotbarPrepare(Rendering renderer, GuiObject hotbarSelectedGUI) {
+        hotbarSelectedGUI.getPosition().setX(0.111f * (currentHotbarItem-4) - blocksize.x/2 * 0.75f);
+        hotbarSelectedGUI.getPosition().setY(-0.9f + blocksize.y);
+        for(int i=0;i<9;i++) {
+            if(!inventorySlots[i].empty()) {
+                renderer.getRenderer().addGUI(new GuiObject(inventorySlots[i].type.getTex(), new Vector2f(hotbarLocations[i].x, hotbarLocations[i].y - blocksize.y), (Vector2f) new Vector2f(blocksize).scale(0.75f)));
             }
         }
     }

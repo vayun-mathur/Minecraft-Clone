@@ -22,6 +22,11 @@ public class Chunk {
 		mesh.update(this);
 	}
 
+	public void setBlock(int x, int y, int z, Block b) {
+		blocks[x][y][z] = b;
+		mesh.update(this);
+	}
+
 	public Block[][][] getBlocks() {
 		return blocks;
 	}

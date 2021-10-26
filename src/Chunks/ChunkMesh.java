@@ -54,12 +54,12 @@ public class ChunkMesh {
 					Block block = chunk.blocks[x][y][z];
 					if(doesNotExist(block)) continue;
 					boolean[] existArr = new boolean[] {
-							x==31 || doesNotExist(chunk.blocks[x + 1][y][z]),
-							x==0 || doesNotExist(chunk.blocks[x - 1][y][z]),
-							y==255 || doesNotExist(chunk.blocks[x][y + 1][z]),
-							y==0 || doesNotExist(chunk.blocks[x][y - 1][z]),
-							z==31 || doesNotExist(chunk.blocks[x][y][z + 1]),
-							z==0 || doesNotExist(chunk.blocks[x][y][z - 1])
+							x==31 || notSolidBlock(chunk.blocks[x + 1][y][z]),
+							x==0 || notSolidBlock(chunk.blocks[x - 1][y][z]),
+							y==255 || notSolidBlock(chunk.blocks[x][y + 1][z]),
+							y==0 || notSolidBlock(chunk.blocks[x][y - 1][z]),
+							z==31 || notSolidBlock(chunk.blocks[x][y][z + 1]),
+							z==0 || notSolidBlock(chunk.blocks[x][y][z - 1])
 					};
 					for(int i=0;i<6;i++) {
 						if(existArr[i])
@@ -79,6 +79,11 @@ public class ChunkMesh {
 
 	private boolean doesNotExist(Block block) {
 		return block == null;
+	}
+
+	private boolean notSolidBlock(Block block) {
+		if(doesNotExist(block)) return true;
+		return !block.type.isSolid();
 	}
 
 	private void populateLists() {

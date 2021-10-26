@@ -29,7 +29,7 @@ public class MainGameLoop {
 
 	private static Game game;
 
-	static GuiObject obj;
+	static GuiObject inventoryGUI, hotbarGUI, hotbarSelectedGUI;
 
 	public static void main(String[] args) {
 
@@ -37,9 +37,15 @@ public class MainGameLoop {
 		renderer = new Rendering();
 		BlockType.init(renderer);
 		game = new Game(renderer.getLoader());
-		obj = new GuiObject(new ModelTexture(renderer.getLoader().loadTexture("textures/gui/inventory")),
+		inventoryGUI = new GuiObject(new ModelTexture(renderer.getLoader().loadTexture("textures/gui/inventory")),
 				new Vector2f(176.f/255/4, -164.f/255/2),
 				new Vector2f((float)Display.getHeight()/Display.getWidth(), 1f));
+		hotbarGUI = new GuiObject(new ModelTexture(renderer.getLoader().loadTexture("textures/gui/hotbar")),
+				new Vector2f(0, -0.85f),
+				new Vector2f((float)Display.getHeight()/Display.getWidth()*0.1f*9, 0.1f));
+		hotbarSelectedGUI = new GuiObject(new ModelTexture(renderer.getLoader().loadTexture("textures/gui/hotbarselected")),
+				new Vector2f(0, -0.9f),
+				new Vector2f((float)Display.getHeight()/Display.getWidth()*0.1f, 0.1f));
 
 		while (!Display.isCloseRequested()) {
 
@@ -64,7 +70,7 @@ public class MainGameLoop {
 	public static void runInventory() {
 		game.updateWorld(renderer.getLoader());
 		game.getPlayer().getInventory().renderPrepare(renderer);
-		renderer.getRenderer().addGUI(obj);
+		renderer.getRenderer().addGUI(inventoryGUI);
 
 		game.getPlayer().getInventory().input();
 
@@ -79,13 +85,24 @@ public class MainGameLoop {
 	public static void runGame() {
 		game.movePlayer();
 
+		game.getPlayer().getInventory().hotbarInput();
+
 		if(Input.getMouseButtonDown(0)) {
 			BlockType type = dig();
 			game.getPlayer().getInventory().addItem(type);
 		}
+		if(Input.getMouseButtonDown(1)) {
+			if(game.getPlayer().getInventory().getCurrentHotbarType() != null) {
+				place(game.getPlayer().getInventory().getCurrentHotbarType());
+				game.getPlayer().getInventory().remove1SelectedHotbarItem();
+			}
+		}
 
 		game.updateWorld(renderer.getLoader());
 
+		game.getPlayer().getInventory().renderHotbarPrepare(renderer, hotbarSelectedGUI);
+		renderer.getRenderer().addGUI(hotbarSelectedGUI);
+		renderer.getRenderer().addGUI(hotbarGUI);
 		renderer.prepare(game);
 		renderer.render(game);
 
@@ -113,6 +130,25 @@ public class MainGameLoop {
 		BlockType type = game.getWorld().getBlock(Math.round(origin.x), Math.round(origin.y), Math.round(origin.z)).type;
 		game.getWorld().removeBlock(Math.round(origin.x), Math.round(origin.y), Math.round(origin.z), renderer);
 		return type;
+	}
+
+	public static void place(BlockType type) {
+		Matrix4f dirmatrix = ((Matrix4f)new Matrix4f().setIdentity())
+				.rotate((float)Math.toRadians(180-game.getPlayer().getYaw()), new Vector3f(0, 1, 0))
+				.rotate((float)Math.toRadians(game.getPlayer().getPitch()), new Vector3f(1, 0, 0));
+		Vector3f dirVector = new Vector3f(Matrix4f.transform(dirmatrix, new Vector4f(0, 0, 1, 0), null));
+		dirVector = (Vector3f) dirVector.normalise(null).scale(0.01f);
+		Vector3f origin = new Vector3f(game.getPlayer().getPosition());
+		int i=0;
+		while(game.getWorld().getBlock(Math.round(origin.x), Math.round(origin.y), Math.round(origin.z)) == null) {
+			Vector3f.add(origin, dirVector, origin);
+			i++;
+			if(i>10000) {
+				return;
+			}
+		}
+		Vector3f.sub(origin, dirVector, origin);
+		game.getWorld().setBlock(Math.round(origin.x), Math.round(origin.y), Math.round(origin.z), type, renderer);
 	}
 
 }
